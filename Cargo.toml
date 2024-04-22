@@ -1,0 +1,15 @@
+[package]
+name = "rummy_500"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rand = "0.8.5"
+
+[lib]
+name = "rummy_500"
+path = "src/lib.rs"
+
+[[bin]]
+name = "rummy_500"
+path = "src/main.rs"
