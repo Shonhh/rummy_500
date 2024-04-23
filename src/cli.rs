@@ -16,7 +16,7 @@ pub fn game_loop(mut game: Game) {
         }
 
         // Check if the game has ended
-        if is_round_over(&game) {
+        if game.is_round_over() {
             println!("Game over!");
             break;
         }
@@ -53,7 +53,7 @@ fn update_game_state(mut game: Game, input: String) -> Option<Game> {
             // Implement meld logic
             print_and_flush("Which cards would you like to play? (e.g., JH, JS, JC): ");
             let card_input = get_user_input();
-            if let Err(error) = play_cards(&mut game, &card_input) {
+            if let Err(error) = game.play_cards(&card_input) {
                 println!("{}", error)
             }
         }
@@ -64,7 +64,7 @@ fn update_game_state(mut game: Game, input: String) -> Option<Game> {
             print_and_flush("Which card would you like to discard? (e.g., JH): ");
             let card_input = get_user_input();
 
-            match discard_card(&mut game, &card_input) {
+            match game.discard_card(&card_input) {
                 Ok(_) => game.next_player(), // Move to the next player after discarding
                 Err(error) => println!("{}", error),
             }
@@ -75,53 +75,6 @@ fn update_game_state(mut game: Game, input: String) -> Option<Game> {
     }
 
     Some(game)
-}
-
-fn discard_card(game: &mut Game, card_input: &str) -> Result<(), String> {
-    let card_str = card_input.trim().to_ascii_uppercase();
-    let current_player = &mut game.plrs[game.cur_plr];
-
-    if let Some(index) = current_player
-        .cards
-        .iter()
-        .position(|card| format!("{}", card) == card_str)
-    {
-        let card = current_player.cards.remove(index);
-        game.discard.cards.push(card);
-        Ok(())
-    } else {
-        Err(format!("Card not found in hand: {}", card_str))
-    }
-}
-
-fn play_cards(game: &mut Game, card_inputs: &str) -> Result<(), String> {
-    let card_strs = card_inputs
-        .split(',')
-        .map(|card| card.trim().to_ascii_uppercase())
-        .collect::<Vec<String>>();
-
-    let current_player = &mut game.plrs[game.cur_plr];
-    let mut cards_to_play = Vec::new();
-
-    for card_str in card_strs {
-        match current_player
-            .cards
-            .iter()
-            .position(|card| format!("{}", card) == card_str)
-        {
-            Some(index) => cards_to_play.push(current_player.cards.remove(index)),
-            None => return Err(format!("Card not found in hand: {}", card_str)),
-        }
-    }
-
-    // Logic to add the cards to the appropriate meld or layoff
-    // ...
-
-    Ok(())
-}
-
-fn is_round_over(game: &Game) -> bool {
-    game.deck.cards.is_empty() || game.plrs.iter().any(|player| player.cards.is_empty())
 }
 
 pub fn display_help() {

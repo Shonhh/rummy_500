@@ -12,7 +12,7 @@ pub struct Game {
 
 impl Game {
     pub fn new(num_players: usize, cards_per_player: usize) -> Self {
-        let mut discard = Discard::new();
+        let discard = Discard::new();
         let mut deck = Stockpile::new();
         deck.shuffle();
 
@@ -33,6 +33,53 @@ impl Game {
     pub fn next_player(&mut self) {
         self.cur_plr += 1;
         self.cur_plr %= self.plrs.len();
+    }
+
+    pub fn play_cards(&mut self, card_inputs: &str) -> Result<(), String> {
+        let card_strs = card_inputs
+            .split(',')
+            .map(|card| card.trim().to_ascii_uppercase())
+            .collect::<Vec<String>>();
+
+        let current_player = &mut self.plrs[self.cur_plr];
+        let mut cards_to_play = Vec::new();
+
+        for card_str in card_strs {
+            match current_player
+                .cards
+                .iter()
+                .position(|card| format!("{}", card) == card_str)
+            {
+                Some(index) => cards_to_play.push(current_player.cards.remove(index)),
+                None => return Err(format!("Card not found in hand: {}", card_str)),
+            }
+        }
+
+        // Logic to add the cards to the appropriate meld or layoff
+        // ...
+
+        Ok(())
+    }
+
+    pub fn discard_card(&mut self, card_input: &str) -> Result<(), String> {
+        let card_str = card_input.trim().to_ascii_uppercase();
+        let current_player = &mut self.plrs[self.cur_plr];
+
+        if let Some(index) = current_player
+            .cards
+            .iter()
+            .position(|card| format!("{}", card) == card_str)
+        {
+            let card = current_player.cards.remove(index);
+            self.discard.cards.push(card);
+            Ok(())
+        } else {
+            Err(format!("Card not found in hand: {}", card_str))
+        }
+    }
+
+    pub fn is_round_over(&self) -> bool {
+        self.deck.cards.is_empty() || self.plrs.iter().any(|player| player.cards.is_empty())
     }
 }
 
