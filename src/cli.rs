@@ -1,6 +1,6 @@
 use std::io::{self, Write};
 
-use crate::game::{CardVec, Game};
+use crate::game::{CardVec, Game, PlayAction};
 
 pub fn game_loop(mut game: Game) {
     display_help();
@@ -51,14 +51,18 @@ fn update_game_state(mut game: Game, input: String) -> Option<Game> {
         }
         "meld" | "m" => {
             // Implement meld logic
-            print_and_flush("Which cards would you like to play? (e.g., JH, JS, JC): ");
+            print_and_flush("Which cards would you like to meld? (e.g., JH, JS, JC): ");
             let card_input = get_user_input();
-            if let Err(error) = game.play_cards(&card_input) {
+            if let Err(error) = game.play_cards(&card_input, PlayAction::Meld) {
                 println!("{}", error)
             }
         }
         "layoff" | "l" => {
-            // Implement layoff logic.
+            print_and_flush("Which cards would you like to layoff? (e.g., JD): ");
+            let card_input = get_user_input();
+            if let Err(error) = game.play_cards(&card_input, PlayAction::Meld) {
+                println!("{}", error)
+            }
         }
         "discard" | "disc" => {
             print_and_flush("Which card would you like to discard? (e.g., JH): ");

@@ -3,6 +3,11 @@ use std::fmt;
 
 pub const STARTING_CARDS: usize = 13;
 
+pub enum PlayAction {
+    Meld,
+    Layoff,
+}
+
 pub struct Game {
     pub deck: Stockpile,
     pub discard: Discard,
@@ -35,23 +40,19 @@ impl Game {
         self.cur_plr %= self.plrs.len();
     }
 
-    pub fn play_cards(&mut self, card_inputs: &str) -> Result<(), String> {
-        let card_strs = card_inputs
-            .split(',')
-            .map(|card| card.trim().to_ascii_uppercase())
-            .collect::<Vec<String>>();
+    pub fn play_cards(&mut self, card_inputs: &str, action: PlayAction) -> Result<(), String> {
+        let cards_to_play = self.parse_cards(card_inputs)?;
 
-        let current_player = &mut self.plrs[self.cur_plr];
-        let mut cards_to_play = Vec::new();
-
-        for card_str in card_strs {
-            match current_player
-                .cards
-                .iter()
-                .position(|card| format!("{}", card) == card_str)
-            {
-                Some(index) => cards_to_play.push(current_player.cards.remove(index)),
-                None => return Err(format!("Card not found in hand: {}", card_str)),
+        match action {
+            PlayAction::Meld => {
+                // Check if valid meld.
+                // If valid, add meld to player melds.
+                todo!();
+            }
+            PlayAction::Layoff => {
+                // Check if cards can be added to an existing meld.
+                // If valid, add cards to meld.
+                todo!();
             }
         }
 
@@ -80,6 +81,29 @@ impl Game {
 
     pub fn is_round_over(&self) -> bool {
         self.deck.cards.is_empty() || self.plrs.iter().any(|player| player.cards.is_empty())
+    }
+
+    pub fn parse_cards(&mut self, card_inputs: &str) -> Result<Vec<Card>, String> {
+        let card_strs = card_inputs
+            .split(',')
+            .map(|card| card.trim().to_ascii_uppercase())
+            .collect::<Vec<String>>();
+
+        let current_player = &mut self.plrs[self.cur_plr];
+        let mut cards_to_play = Vec::new();
+
+        for card_str in card_strs {
+            match current_player
+                .cards
+                .iter()
+                .position(|card| format!("{}", card) == card_str)
+            {
+                Some(index) => cards_to_play.push(current_player.cards.remove(index)),
+                None => return Err(format!("Card not found in hand: {}", card_str)),
+            }
+        }
+
+        Ok(cards_to_play)
     }
 }
 
